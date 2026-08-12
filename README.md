@@ -1,20 +1,20 @@
-# openhost-openweb-ui
+# bottled-openweb-ui
 
-[Open WebUI](https://github.com/open-webui/open-webui) packaged for deployment on OpenHost. A startup wrapper (`openhost_start.sh`) adapts it to OpenHost's data, auth, and domain conventions.
+[Open WebUI](https://github.com/open-webui/open-webui) packaged for deployment on Cloud in a Bottle. A startup wrapper (`openhost_start.sh`) adapts it to Cloud in a Bottle's data, auth, and domain conventions.
 
 ## Deploying
 
-In your OpenHost router dashboard, choose **Add App**, use this repository URL, and confirm. The app is served privately at `https://{app_name}.{zone_domain}` — no public paths are configured, so every request is gated to the compute-space owner.
+In your Cloud in a Bottle router dashboard, choose **Add App**, use this repository URL, and confirm. The app is served privately at `https://{app_name}.{zone_domain}` — no public paths are configured, so every request is gated to the compute-space owner.
 
 ## Authentication
 
-Because OpenHost already authenticates the owner, Open WebUI runs in single-user mode (`WEBUI_AUTH=False`): the owner lands directly on the main page as the admin user, with no Open WebUI login.
+Because Cloud in a Bottle already authenticates the owner, Open WebUI runs in single-user mode (`WEBUI_AUTH=False`): the owner lands directly on the main page as the admin user, with no Open WebUI login.
 
 To use Open WebUI's own multi-user auth instead, set `WEBUI_AUTH=True` in the app's environment.
 
 ## Model provider: Bifrost gateway
 
-This app consumes the [Bifrost LLM gateway](https://github.com/imbue-openhost/openhost-bifrost-llm-gateway)'s
+This app consumes the [Bifrost LLM gateway](https://github.com/imbue-openhost/bottled-bifrost)'s
 `openai-compat` service and wires it up as an Open WebUI model provider
 automatically — no manual connection setup.
 
@@ -24,7 +24,7 @@ automatically — no manual connection setup.
   configured in its web UI.
 - A local `mitmproxy` (`openhost_bifrost_proxy.py`, started by
   `openhost_start.sh`) exposes the gateway as a plain OpenAI endpoint on
-  `127.0.0.1:9000`: it rewrites each request onto the OpenHost service-call path
+  `127.0.0.1:9000`: it rewrites each request onto the Cloud in a Bottle service-call path
   and attaches the app token, so Open WebUI never holds a credential. Responses
   are streamed for incremental chat output.
 - On first boot, Open WebUI is seeded (`OPENAI_API_BASE_URL`) to use that
@@ -41,11 +41,11 @@ The image is pinned to a release tag in the `Dockerfile`. To upgrade, bump the t
 - **Backed up** (`OPENHOST_APP_DATA_DIR`): database, settings, uploads, vector data, secret key.
 - **Not backed up** (`OPENHOST_APP_TEMP_DIR`): the model cache (embedding/whisper/tiktoken), which is large and regenerable.
 
-Inject model API keys as environment variables via your OpenHost app settings.
+Inject model API keys as environment variables via your Cloud in a Bottle app settings.
 
 ## Tests
 
-End-to-end tests drive the real container behind a mock OpenHost router using the [openhost-app-test-harness](https://github.com/imbue-openhost/openhost-app-test-harness) and Playwright. Requires podman.
+End-to-end tests drive the real container behind a mock Cloud in a Bottle router using the [openhost-app-test-harness](https://github.com/imbue-openhost/openhost-app-test-harness) and Playwright. Requires podman.
 
 ```bash
 uv sync
