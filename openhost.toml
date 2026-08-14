@@ -1,7 +1,7 @@
 [app]
 name = "openweb-ui"
 version = "0.1.0"
-description = "Open WebUI on OpenHost"
+description = "Open WebUI on Cloud in a Bottle"
 
 [runtime.container]
 image = "Dockerfile"
