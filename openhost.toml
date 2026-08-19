@@ -12,11 +12,11 @@ health_check = "/health"
 
 [resources]
 memory_mb = 2048
-cpu_millicores = 1000
+cpu_cores = 1.0
 
 [data]
 app_data = true
-# to store openrouter's cache (embedding/whisper/tiktoken models).
+# to store Open WebUI's cache (embedding/whisper/tiktoken models).
 app_temp_data = true
 
 # Consume the Bifrost gateway's OpenAI-compatible API. Wired up automatically as

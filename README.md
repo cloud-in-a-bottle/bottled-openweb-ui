@@ -1,54 +1,54 @@
 # bottled-openweb-ui
 
-[Open WebUI](https://github.com/open-webui/open-webui) packaged for deployment on Cloud in a Bottle. A startup wrapper (`openhost_start.sh`) adapts it to Cloud in a Bottle's data, auth, and domain conventions.
+[Open WebUI](https://github.com/open-webui/open-webui), a self-hosted web
+interface for large language models, packaged as a Cloud in a Bottle app.
 
-## Deploying
+## What you get
 
-In your Cloud in a Bottle router dashboard, choose **Add App**, use this repository URL, and confirm. The app is served privately at `https://{app_name}.{zone_domain}` — no public paths are configured, so every request is gated to the compute-space owner.
+- A full chat UI for large language models, with conversations, folders, notes,
+  and file/knowledge uploads.
+- Owner auto-login: the Cloud in a Bottle router already authenticates you, so
+  Open WebUI runs in single-user mode and you land directly in the app as the
+  admin, with no separate Open WebUI login.
+- A model provider wired up automatically to your instance's Bifrost LLM
+  gateway.
 
-## Authentication
+## Models
 
-Because Cloud in a Bottle already authenticates the owner, Open WebUI runs in single-user mode (`WEBUI_AUTH=False`): the owner lands directly on the main page as the admin user, with no Open WebUI login.
+Open WebUI gets its models from the [Bifrost LLM
+gateway](https://github.com/imbue-openhost/bottled-bifrost) on your instance.
+Install the Bifrost gateway app, configure at least one provider in it, and
+approve this app's access grant at install time. The connection is set up for
+you on first boot; you can manage it later under Admin Settings, Connections.
+Model API keys live in the gateway, not in this app.
 
-To use Open WebUI's own multi-user auth instead, set `WEBUI_AUTH=True` in the app's environment.
+## Usage
 
-## Model provider: Bifrost gateway
+Open the app and start a chat. Your conversations, uploads, and settings are
+saved to your instance.
 
-This app consumes the [Bifrost LLM gateway](https://github.com/imbue-openhost/bottled-bifrost)'s
-`openai-compat` service and wires it up as an Open WebUI model provider
-automatically — no manual connection setup.
+## Caveats
 
-- Installing the app requests the gateway's `full_access` grant (declared as a
-  `services.v2.consumes` block in `openhost.toml`). Approve it at install time,
-  and make sure the gateway app is installed with at least one provider
-  configured in its web UI.
-- A local `mitmproxy` (`openhost_bifrost_proxy.py`, started by
-  `openhost_start.sh`) exposes the gateway as a plain OpenAI endpoint on
-  `127.0.0.1:9000`: it rewrites each request onto the Cloud in a Bottle service-call path
-  and attaches the app token, so Open WebUI never holds a credential. Responses
-  are streamed for incremental chat output.
-- On first boot, Open WebUI is seeded (`OPENAI_API_BASE_URL`) to use that
-  endpoint. These are Open WebUI PersistentConfig values, so after first boot the
-  owner manages the connection in the UI. The models offered are whatever the
-  gateway owner configured (e.g. `openai/gpt-4o`).
-
-## Upgrading Open WebUI
-
-The image is pinned to a release tag in the `Dockerfile`. To upgrade, bump the tag.
+- Chat replies need the Bifrost gateway installed and configured with a working
+  provider; until then the UI loads but has no models to talk to.
+- The app runs in single-user mode as the owner. Turning on Open WebUI's own
+  multi-user login is a packaging change (edit the startup wrapper and
+  redeploy), not a runtime setting.
 
 ## Data
 
-- **Backed up** (`OPENHOST_APP_DATA_DIR`): database, settings, uploads, vector data, secret key.
-- **Not backed up** (`OPENHOST_APP_TEMP_DIR`): the model cache (embedding/whisper/tiktoken), which is large and regenerable.
+Backed up: the database, settings, uploads, vector data, and the session
+signing key. Not backed up: the model cache (embedding, speech, and tokenizer
+models), which is large and regenerates on demand.
 
-Inject model API keys as environment variables via your Cloud in a Bottle app settings.
+## Resources
 
-## Tests
+2 GB RAM, 1 CPU core.
 
-End-to-end tests drive the real container behind a mock Cloud in a Bottle router using the [openhost-app-test-harness](https://github.com/imbue-openhost/openhost-app-test-harness) and Playwright. Requires podman.
+## License
 
-```bash
-uv sync
-uv run playwright install chromium
-uv run pytest
-```
+Open WebUI is distributed under the Open WebUI License, a BSD-3-Clause-style
+license with an added branding-protection clause. Because this image bundles
+Open WebUI, the image as a whole is conveyed under that license (see LICENSE).
+The packaging files original to this repository are additionally offered under
+the MIT License; see NOTICE.

@@ -1,0 +1,28 @@
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+# Local sidecar in front of Open WebUI (which listens on loopback :8081).
+# Serves the container's public port and adds the security headers Open WebUI
+# does not set, so the owner UI can't be framed (clickjacking) or MIME-sniffed.
+:8080 {
+	header {
+		# `defer` applies these after the proxied response, so they win.
+		defer
+		X-Frame-Options "DENY"
+		Content-Security-Policy "frame-ancestors 'none'"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+	}
+
+	reverse_proxy 127.0.0.1:8081 {
+		# Retry (rather than 502) while Open WebUI is binding :8081 on a
+		# start or restart, so brief races don't flap the health check.
+		# Kept modest so a genuinely dead upstream still fails in a bounded
+		# time; the platform's own startup grace covers a rare first-boot
+		# model download that runs longer than this.
+		lb_try_duration 60s
+	}
+}
