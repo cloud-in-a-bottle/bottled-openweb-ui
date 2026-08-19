@@ -1,0 +1,64 @@
+bottled-openweb-ui
+==================
+
+This repository packages Open WebUI for Cloud in a Bottle / OpenHost.
+
+Open WebUI
+----------
+This image is built FROM the official Open WebUI container image and
+distributes Open WebUI, a self-hosted web interface for large language models.
+
+  Upstream:    https://github.com/open-webui/open-webui
+  License:     Open WebUI License (a BSD-3-Clause-style license with an added
+               branding-protection clause), Copyright (c) 2023- Open WebUI Inc.
+               [Created by Timothy Jaeryang Baek]
+  Base image:  ghcr.io/open-webui/open-webui:v0.9.5 (see the FROM line in the
+               Dockerfile)
+
+The full Open WebUI License is reproduced in LICENSE, as its terms require the
+copyright notice and conditions to be retained on redistribution. Note clause 4
+of that license: the "Open WebUI" branding must not be removed or altered
+(subject to the stated exceptions). This package does not modify Open WebUI or
+its branding; the startup wrapper only adapts data paths, disables Open WebUI's
+own login (the Cloud in a Bottle router gates to the owner), pins the public
+URL, and wires up the model provider.
+
+Third-party components
+----------------------
+The image additionally installs mitmproxy (mitmdump), used locally to front the
+Bifrost LLM gateway as an OpenAI-compatible endpoint.
+
+  mitmproxy:   https://github.com/mitmproxy/mitmproxy  (MIT License)
+
+Licensing of this repository
+----------------------------
+Because the container image built here includes Open WebUI, the image as a
+whole is conveyed under the Open WebUI License (see LICENSE).
+
+The files original to this repository - openhost_start.sh,
+openhost_bifrost_proxy.py, the Dockerfile, openhost.toml, pyproject.toml, the
+tests, and documentation (Copyright (c) 2026 the Cloud in a Bottle authors) -
+are additionally made available under the MIT License below. MIT covers only
+those packaging files, not the bundled Open WebUI software.
+
+    MIT License
+
+    Copyright (c) 2026 the Cloud in a Bottle authors
+
+    Permission is hereby granted, free of charge, to any person obtaining a
+    copy of this software and associated documentation files (the "Software"),
+    to deal in the Software without restriction, including without limitation
+    the rights to use, copy, modify, merge, publish, distribute, sublicense,
+    and/or sell copies of the Software, and to permit persons to whom the
+    Software is furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+    DEALINGS IN THE SOFTWARE.

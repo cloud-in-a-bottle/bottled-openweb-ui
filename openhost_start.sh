@@ -36,6 +36,11 @@ export WEBUI_AUTH="False"
 # Public URL for the app's OpenHost zone.
 export WEBUI_URL="https://$OPENHOST_APP_NAME.$OPENHOST_ZONE_DOMAIN"
 
+# Restrict CORS to this app's own origin instead of Open WebUI's default "*".
+# The frontend is same-origin so this doesn't affect it; it just stops
+# arbitrary third-party sites from making credentialed cross-origin calls.
+export CORS_ALLOW_ORIGIN="$WEBUI_URL"
+
 # Front the Bifrost gateway's OpenAI-compatible service as a local endpoint.
 # mitmdump reverse-proxies to the router and the addon rewrites each request
 # onto the service-call path and attaches the app token (see
@@ -62,6 +67,23 @@ export OPENAI_API_KEY="openhost-bifrost"
 # Turn off the auto-generated "Follow up" suggestion prompts in chat (also
 # PersistentConfig: first-boot default, owner can re-enable in the UI).
 export ENABLE_FOLLOW_UP_GENERATION="False"
+
+# Front Open WebUI with a local Caddy that adds the security headers Open WebUI
+# omits (X-Frame-Options, CSP frame-ancestors, nosniff, Referrer-Policy). Open
+# WebUI binds loopback :8081; Caddy serves the container's public :8080 and
+# reverse-proxies to it. Restart it if it ever exits.
+export HOST="127.0.0.1"
+export PORT="8081"
+(
+  # Keep Caddy's storage in the (writable, non-backed-up) temp dir.
+  export XDG_CONFIG_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
+  export XDG_DATA_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
+  mkdir -p "$XDG_CONFIG_HOME"
+  while true; do
+    caddy run --config /app/Caddyfile --adapter caddyfile || true
+    sleep 2
+  done
+) &
 
 cd /app/backend
 exec bash /app/backend/start.sh "$@"
