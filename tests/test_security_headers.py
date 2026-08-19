@@ -37,11 +37,17 @@ def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) 
     # the assertion below is only meaningful on a real CORS-bearing response.
     assert resp.status == 200, f"unexpected status {resp.status}"
 
-    # Open WebUI's insecure default (CORS_ALLOW_ORIGIN='*') echoes the request
-    # origin back with credentials; the packaging restricts CORS to the app's
-    # own origin. Starlette omits Access-Control-Allow-Origin entirely for a
-    # disallowed origin, so a hostile origin must yield no header at all. If the
-    # insecure default regressed, this origin would be reflected (or '*') and
-    # the assertion would fail.
+    # With the insecure default (CORS_ALLOW_ORIGIN='*'), a hostile origin would
+    # come back allowed: Open WebUI runs with credentials enabled, so Starlette
+    # reflects the request origin (and would send '*' if credentials were off).
+    # The packaging restricts CORS to the app's own origin, so Starlette omits
+    # Access-Control-Allow-Origin entirely for a disallowed origin. A hostile
+    # origin must therefore yield no header; if the restriction regressed to the
+    # default, this origin would be reflected (or '*') and the assertion fails.
+    #
+    # There is no positive control (app-origin -> ACAO reflected): the app's own
+    # origin isn't reliably known inside the harness, and it isn't needed here.
+    # A same-origin frontend never triggers CORS, and dropping the restriction
+    # reverts to the permissive default, which this negative check catches.
     acao = resp.headers.get("access-control-allow-origin")
     assert acao is None, f"arbitrary origin was allowed (ACAO={acao!r})"
