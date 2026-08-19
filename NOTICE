@@ -21,14 +21,17 @@ of that license: the "Open WebUI" branding must not be removed or altered
 (subject to the stated exceptions). This package does not modify Open WebUI or
 its branding; the startup wrapper only adapts data paths, disables Open WebUI's
 own login (the Cloud in a Bottle router gates to the owner), pins the public
-URL, and wires up the model provider.
+URL, wires up the model provider, restricts CORS to the app's own origin, and
+fronts the app with a local Caddy reverse proxy that adds security headers.
 
 Third-party components
 ----------------------
-The image additionally installs mitmproxy (mitmdump), used locally to front the
-Bifrost LLM gateway as an OpenAI-compatible endpoint.
+The image additionally installs two standalone binaries used at runtime:
 
-  mitmproxy:   https://github.com/mitmproxy/mitmproxy  (MIT License)
+  mitmproxy:   https://github.com/mitmproxy/mitmproxy   (MIT License)
+               fronts the Bifrost LLM gateway as an OpenAI-compatible endpoint.
+  Caddy:       https://github.com/caddyserver/caddy     (Apache License 2.0)
+               local reverse proxy that adds security headers to responses.
 
 Licensing of this repository
 ----------------------------
@@ -36,10 +39,10 @@ Because the container image built here includes Open WebUI, the image as a
 whole is conveyed under the Open WebUI License (see LICENSE).
 
 The files original to this repository - openhost_start.sh,
-openhost_bifrost_proxy.py, the Dockerfile, openhost.toml, pyproject.toml, the
-tests, and documentation (Copyright (c) 2026 the Cloud in a Bottle authors) -
-are additionally made available under the MIT License below. MIT covers only
-those packaging files, not the bundled Open WebUI software.
+openhost_bifrost_proxy.py, Caddyfile, the Dockerfile, openhost.toml,
+pyproject.toml, the tests, and documentation (Copyright (c) 2026 the Cloud in a
+Bottle authors) - are additionally made available under the MIT License below.
+MIT covers only those packaging files, not the bundled Open WebUI software.
 
     MIT License
 

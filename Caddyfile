@@ -18,8 +18,10 @@
 	}
 
 	reverse_proxy 127.0.0.1:8081 {
-		# Retry instead of 502 while Open WebUI is still booting, so the
-		# health check doesn't flap during startup.
-		lb_try_duration 30s
+		# Smooth the brief window where Open WebUI is still binding :8081
+		# (startup, or a restart) so Caddy retries instead of returning 502
+		# and flapping the health check. Kept short so a genuinely down
+		# upstream fails reasonably fast in steady state.
+		lb_try_duration 15s
 	}
 }

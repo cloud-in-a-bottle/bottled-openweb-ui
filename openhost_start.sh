@@ -70,20 +70,22 @@ export ENABLE_FOLLOW_UP_GENERATION="False"
 
 # Front Open WebUI with a local Caddy that adds the security headers Open WebUI
 # omits (X-Frame-Options, CSP frame-ancestors, nosniff, Referrer-Policy). Open
-# WebUI binds loopback :8081; Caddy serves the container's public :8080 and
-# reverse-proxies to it. Restart it if it ever exits.
-export HOST="127.0.0.1"
-export PORT="8081"
+# WebUI binds loopback :8081 (see the exec below); Caddy serves the container's
+# public :8080 and reverse-proxies to it. Restart it if it ever exits.
 (
   # Keep Caddy's storage in the (writable, non-backed-up) temp dir.
   export XDG_CONFIG_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
   export XDG_DATA_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
   mkdir -p "$XDG_CONFIG_HOME"
   while true; do
-    caddy run --config /app/Caddyfile --adapter caddyfile || true
+    rc=0
+    caddy run --config /app/Caddyfile --adapter caddyfile || rc=$?
+    echo "[openhost] caddy exited (rc=$rc), restarting in 2s" >&2
     sleep 2
   done
 ) &
 
+# Bind Open WebUI to loopback :8081 behind Caddy. Scope HOST/PORT to this exec
+# so they don't leak into the wider environment.
 cd /app/backend
-exec bash /app/backend/start.sh "$@"
+exec env HOST="127.0.0.1" PORT="8081" bash /app/backend/start.sh "$@"
