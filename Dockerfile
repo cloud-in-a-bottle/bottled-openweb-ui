@@ -2,9 +2,11 @@ FROM ghcr.io/open-webui/open-webui:v0.9.5
 
 # mitmproxy fronts the Bifrost gateway's service interface as a local OpenAI
 # endpoint (see openhost_bifrost_proxy.py). Use the standalone binary so it
-# doesn't touch Open WebUI's Python env.
-RUN curl -fsSL https://downloads.mitmproxy.org/12.2.3/mitmproxy-12.2.3-linux-x86_64.tar.gz \
-    | tar -xz -C /usr/local/bin mitmdump
+# doesn't touch Open WebUI's Python env. Checksum-verified before extracting.
+RUN curl -fsSL -o /tmp/mitmproxy.tar.gz https://downloads.mitmproxy.org/12.2.3/mitmproxy-12.2.3-linux-x86_64.tar.gz \
+    && echo "2e95286b618fa6fd33e5e62a78c2e5112571d85f42ec2bac29b97ee242bdb5c5  /tmp/mitmproxy.tar.gz" | sha256sum -c - \
+    && tar -xzf /tmp/mitmproxy.tar.gz -C /usr/local/bin mitmdump \
+    && rm /tmp/mitmproxy.tar.gz
 
 # Caddy (pinned + checksum-verified) is a local sidecar that fronts Open WebUI
 # to add the security headers it does not set (see Caddyfile / openhost_start.sh).
