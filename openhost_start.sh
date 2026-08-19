@@ -48,10 +48,12 @@ export CORS_ALLOW_ORIGIN="$WEBUI_URL"
 export BIFROST_SHORTNAME="llm"
 (
   while true; do
+    rc=0
     mitmdump \
       --mode "reverse:$OPENHOST_ROUTER_URL" \
       --listen-host 127.0.0.1 --listen-port 9000 \
-      -s /app/openhost_bifrost_proxy.py || true
+      -s /app/openhost_bifrost_proxy.py || rc=$?
+    echo "[openhost] mitmdump exited (rc=$rc), restarting in 2s" >&2
     sleep 2
   done
 ) &

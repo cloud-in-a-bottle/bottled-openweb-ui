@@ -23,14 +23,22 @@ def test_security_headers_present(stack: OpenhostStack, page: Page) -> None:
     assert headers.get("referrer-policy") == "no-referrer", headers
 
 
-def test_cors_is_not_wildcard(stack: OpenhostStack, page: Page) -> None:
-    # An arbitrary Origin must not be reflected back and must never be "*"
-    # (Open WebUI's default), so third-party sites can't make credentialed
-    # cross-origin reads.
+def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) -> None:
+    # Land on the app first so the owner holds a session (matches the other
+    # tests), then probe an admin-gated endpoint with a hostile Origin.
+    page.goto(stack.url + "/", wait_until="networkidle")
+    page.wait_for_selector("#chat-input", timeout=30_000)
+
     resp = page.request.get(
         stack.url + "/api/config",
         headers={"Origin": "https://evil.example"},
     )
+    # Guard against passing trivially on a non-200 (e.g. Caddy not up, a 401):
+    # the assertion below is only meaningful on a real CORS-bearing response.
+    assert resp.status == 200, f"unexpected status {resp.status}"
+
+    # Open WebUI's insecure default (CORS_ALLOW_ORIGIN='*') echoes the request
+    # origin back with credentials; the packaging restricts CORS to the app's
+    # own origin, so an arbitrary origin must never be reflected.
     acao = resp.headers.get("access-control-allow-origin")
-    assert acao != "*", resp.headers
-    assert acao != "https://evil.example", resp.headers
+    assert acao not in ("*", "https://evil.example"), f"arbitrary origin allowed: {acao!r}"
