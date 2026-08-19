@@ -16,8 +16,10 @@
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "no-referrer"
 		# The app is only ever served over HTTPS (the OpenHost router
-		# terminates TLS), so pin the browser to HTTPS.
-		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		# terminates TLS), so pin the browser to HTTPS. No includeSubDomains:
+		# this app owns only its own subdomain and shouldn't assert an HTTPS
+		# policy over any child names.
+		Strict-Transport-Security "max-age=31536000"
 	}
 
 	reverse_proxy 127.0.0.1:8081 {
