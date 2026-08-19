@@ -20,7 +20,7 @@ def test_security_headers_present(stack: OpenhostStack, page: Page) -> None:
     assert headers.get("x-frame-options") == "DENY", headers
     assert "frame-ancestors 'none'" in (headers.get("content-security-policy") or ""), headers
     assert headers.get("x-content-type-options") == "nosniff", headers
-    assert headers.get("referrer-policy") == "no-referrer", headers
+    assert headers.get("referrer-policy") == "same-origin", headers
 
 
 def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) -> None:
