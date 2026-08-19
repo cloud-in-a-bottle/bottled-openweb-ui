@@ -41,22 +41,27 @@ export WEBUI_URL="https://$OPENHOST_APP_NAME.$OPENHOST_ZONE_DOMAIN"
 # arbitrary third-party sites from making credentialed cross-origin calls.
 export CORS_ALLOW_ORIGIN="$WEBUI_URL"
 
+# Run a sidecar forever, logging each exit and pausing before the restart.
+run_sidecar() {
+  local name="$1"
+  shift
+  while true; do
+    local rc=0
+    "$@" || rc=$?
+    echo "[openhost] $name exited (rc=$rc), restarting in 2s" >&2
+    sleep 2
+  done
+}
+
 # Front the Bifrost gateway's OpenAI-compatible service as a local endpoint.
 # mitmdump reverse-proxies to the router and the addon rewrites each request
 # onto the service-call path and attaches the app token (see
 # openhost_bifrost_proxy.py). Restart it if it ever exits.
 export BIFROST_SHORTNAME="llm"
-(
-  while true; do
-    rc=0
-    mitmdump \
-      --mode "reverse:$OPENHOST_ROUTER_URL" \
-      --listen-host 127.0.0.1 --listen-port 9000 \
-      -s /app/openhost_bifrost_proxy.py || rc=$?
-    echo "[openhost] mitmdump exited (rc=$rc), restarting in 2s" >&2
-    sleep 2
-  done
-) &
+run_sidecar mitmdump mitmdump \
+  --mode "reverse:$OPENHOST_ROUTER_URL" \
+  --listen-host 127.0.0.1 --listen-port 9000 \
+  -s /app/openhost_bifrost_proxy.py &
 
 # Auto-configure that endpoint as an Open WebUI model provider. These are
 # PersistentConfig values: seeded into the DB on first boot, after which the
@@ -81,12 +86,7 @@ export ENABLE_FOLLOW_UP_GENERATION="False"
   export XDG_CONFIG_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
   export XDG_DATA_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
   mkdir -p "$XDG_CONFIG_HOME" || echo "[openhost] warning: could not create $XDG_CONFIG_HOME" >&2
-  while true; do
-    rc=0
-    caddy run --config /app/Caddyfile --adapter caddyfile || rc=$?
-    echo "[openhost] caddy exited (rc=$rc), restarting in 2s" >&2
-    sleep 2
-  done
+  run_sidecar caddy caddy run --config /app/Caddyfile --adapter caddyfile
 ) &
 
 # Bind Open WebUI to loopback :8081 behind Caddy. Scope HOST/PORT to this exec
