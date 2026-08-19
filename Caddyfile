@@ -14,7 +14,12 @@
 		X-Frame-Options "DENY"
 		Content-Security-Policy "frame-ancestors 'none'"
 		X-Content-Type-Options "nosniff"
-		Referrer-Policy "no-referrer"
+		# "same-origin", NOT "no-referrer": under a no-referrer policy Chromium
+		# sends "Origin: null" on POST requests, and the OpenHost router rejects
+		# owner-authenticated POSTs whose Origin doesn't match the app host,
+		# which breaks the app's own API calls. same-origin still withholds the
+		# Referer cross-origin while sending a correct same-origin Origin.
+		Referrer-Policy "same-origin"
 		# The app is only ever served over HTTPS (the OpenHost router
 		# terminates TLS), so pin the browser to HTTPS. No includeSubDomains:
 		# this app owns only its own subdomain and shouldn't assert an HTTPS
