@@ -24,8 +24,8 @@ def test_security_headers_present(stack: OpenhostStack, page: Page) -> None:
 
 
 def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) -> None:
-    # Land on the app first so the owner holds a session (matches the other
-    # tests), then probe an admin-gated endpoint with a hostile Origin.
+    # Navigate first so Open WebUI has finished initializing and the auto-admin
+    # (WEBUI_AUTH=False) exists before probing the admin-gated endpoint.
     page.goto(stack.url + "/", wait_until="networkidle")
     page.wait_for_selector("#chat-input", timeout=30_000)
 

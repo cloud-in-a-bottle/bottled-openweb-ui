@@ -75,10 +75,12 @@ export ENABLE_FOLLOW_UP_GENERATION="False"
 # WebUI binds loopback :8081 (see the exec below); Caddy serves the container's
 # public :8080 and reverse-proxies to it. Restart it if it ever exits.
 (
-  # Keep Caddy's storage in the (writable, non-backed-up) temp dir.
+  # Keep Caddy's storage in the (writable, non-backed-up) temp dir. Guard the
+  # mkdir so a failure here can't silently kill the subshell under `set -e`
+  # (which would leave :8080 with no listener); log it and let Caddy try anyway.
   export XDG_CONFIG_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
   export XDG_DATA_HOME="$OPENHOST_APP_TEMP_DIR/caddy"
-  mkdir -p "$XDG_CONFIG_HOME"
+  mkdir -p "$XDG_CONFIG_HOME" || echo "[openhost] warning: could not create $XDG_CONFIG_HOME" >&2
   while true; do
     rc=0
     caddy run --config /app/Caddyfile --adapter caddyfile || rc=$?
