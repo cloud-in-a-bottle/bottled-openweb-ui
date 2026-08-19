@@ -39,6 +39,9 @@ def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) 
 
     # Open WebUI's insecure default (CORS_ALLOW_ORIGIN='*') echoes the request
     # origin back with credentials; the packaging restricts CORS to the app's
-    # own origin, so an arbitrary origin must never be reflected.
+    # own origin. Starlette omits Access-Control-Allow-Origin entirely for a
+    # disallowed origin, so a hostile origin must yield no header at all. If the
+    # insecure default regressed, this origin would be reflected (or '*') and
+    # the assertion would fail.
     acao = resp.headers.get("access-control-allow-origin")
-    assert acao not in ("*", "https://evil.example"), f"arbitrary origin allowed: {acao!r}"
+    assert acao is None, f"arbitrary origin was allowed (ACAO={acao!r})"

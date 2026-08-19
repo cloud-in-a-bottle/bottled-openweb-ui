@@ -18,10 +18,11 @@
 	}
 
 	reverse_proxy 127.0.0.1:8081 {
-		# Smooth the brief window where Open WebUI is still binding :8081
-		# (startup, or a restart) so Caddy retries instead of returning 502
-		# and flapping the health check. Kept short so a genuinely down
-		# upstream fails reasonably fast in steady state.
-		lb_try_duration 15s
+		# Retry (rather than 502) while Open WebUI is binding :8081 on a
+		# start or restart, so brief races don't flap the health check.
+		# Kept modest so a genuinely dead upstream still fails in a bounded
+		# time; the platform's own startup grace covers a rare first-boot
+		# model download that runs longer than this.
+		lb_try_duration 60s
 	}
 }
