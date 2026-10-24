@@ -11,9 +11,13 @@ against Caddy failing to start or the config regressing.
 from openhost_test_harness import OpenhostStack
 from playwright.sync_api import Page
 
+# page.request doesn't send fetch metadata, and the router only accepts owner cookie auth
+# on same-origin requests, so declare it as the app's own frontend would.
+SAME_ORIGIN = {"Sec-Fetch-Site": "same-origin"}
+
 
 def test_security_headers_present(stack: OpenhostStack, page: Page) -> None:
-    resp = page.request.get(stack.url + "/")
+    resp = page.request.get(stack.url + "/", headers=SAME_ORIGIN)
     assert resp.status == 200, f"unexpected status {resp.status}"
     headers = resp.headers
 
@@ -31,7 +35,7 @@ def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) 
 
     resp = page.request.get(
         stack.url + "/api/config",
-        headers={"Origin": "https://evil.example"},
+        headers={**SAME_ORIGIN, "Origin": "https://evil.example"},
     )
     # Guard against passing trivially on a non-200 (e.g. Caddy not up, a 401):
     # the assertion below is only meaningful on a real CORS-bearing response.

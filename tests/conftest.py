@@ -1,9 +1,8 @@
 """Shared pytest fixtures.
 
-Spins up the real Open WebUI container behind the mock OpenHost router (which
-injects ``X-OpenHost-Is-Owner: true`` on every request, exactly like the real
-router does for the authenticated compute-space owner), and provides a
-Playwright browser pointed at it.
+Deploys the real Open WebUI container through the Cloud in a Bottle router, and
+provides a Playwright page logged in as the zone owner (so the router sends
+``X-OpenHost-Is-Owner: true`` to the app, as it does for the real owner).
 """
 
 from collections.abc import Iterator
@@ -15,9 +14,10 @@ from playwright.sync_api import Browser, Page, sync_playwright
 
 @pytest.fixture(scope="session")
 def stack() -> Iterator[OpenhostStack]:
-    # Open WebUI's first boot runs DB migrations and downloads embedding models
-    # from HuggingFace before it binds, so it needs a generous readiness window.
-    with OpenhostStack(readiness_timeout=300) as s:
+    # The deploy window covers the image build (a ~4 GB base image to pull) and
+    # Open WebUI's first boot, which runs DB migrations and downloads embedding
+    # models from HuggingFace before it binds.
+    with OpenhostStack(deploy_timeout=600) as s:
         yield s
 
 
@@ -32,10 +32,11 @@ def browser() -> Iterator[Browser]:
 
 
 @pytest.fixture
-def page(browser: Browser) -> Iterator[Page]:
+def page(stack: OpenhostStack, browser: Browser) -> Iterator[Page]:
     context = browser.new_context()
     pg = context.new_page()
     try:
+        stack.playwright_login(pg)
         yield pg
     finally:
         context.close()
