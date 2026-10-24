@@ -13,6 +13,10 @@ verifies the configuration side.
 from openhost_test_harness import OpenhostStack
 from playwright.sync_api import Page
 
+# page.request doesn't send fetch metadata, and the router only accepts owner cookie auth
+# on same-origin requests, so declare it as the app's own frontend would.
+SAME_ORIGIN = {"Sec-Fetch-Site": "same-origin"}
+
 PROXY_BASE_URL = "http://127.0.0.1:9000/openai/v1"
 
 
@@ -22,7 +26,7 @@ def test_openai_connection_points_at_bifrost_proxy(stack: OpenhostStack, page: P
     page.goto(stack.url + "/", wait_until="networkidle")
     page.wait_for_selector("#chat-input", timeout=30_000)
 
-    resp = page.request.get(stack.url + "/openai/config")
+    resp = page.request.get(stack.url + "/openai/config", headers=SAME_ORIGIN)
     assert resp.status == 200, f"could not read OpenAI config (status {resp.status})"
 
     config = resp.json()
