@@ -2,7 +2,7 @@
 name = "openhost-openweb-ui-tests"
 version = "0.1.0"
 description = "Tests for the OpenHost Open WebUI deployment"
-requires-python = ">=3.12"
+requires-python = "==3.12.*"
 dependencies = []
 
 [dependency-groups]
