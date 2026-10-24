@@ -1,10 +1,9 @@
 """First-boot behavior: the OpenHost owner should land directly on Open WebUI's
 main page, with Open WebUI's own user setup / login bypassed.
 
-The mock router fronts the container and injects ``X-OpenHost-Is-Owner: true``
-on every request, just as the real OpenHost router does for the authenticated
-owner. So simply pointing a browser at ``stack.url`` reproduces what the owner
-sees on a brand-new deployment.
+The ``page`` fixture is logged in to the router as the zone owner, so the
+router injects ``X-OpenHost-Is-Owner: true`` on every request. Pointing it at
+``stack.url`` reproduces what the owner sees on a brand-new deployment.
 """
 
 from openhost_test_harness import OpenhostStack

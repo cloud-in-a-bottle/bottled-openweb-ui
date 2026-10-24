@@ -5,9 +5,9 @@ On first boot openhost_start.sh seeds Open WebUI's OpenAI connection to point at
 the local mitmproxy (127.0.0.1:9000), which fronts the gateway's service
 interface. Here we assert Open WebUI actually holds that connection.
 
-The test harness's mock router does not simulate cross-app service calls, so a
-true end-to-end "list models from Bifrost" check needs a live instance with both
-apps installed; this verifies the configuration side.
+The test harness doesn't deploy the Bifrost gateway, so a true end-to-end "list
+models from Bifrost" check needs a live instance with both apps installed; this
+verifies the configuration side.
 """
 
 from openhost_test_harness import OpenhostStack
