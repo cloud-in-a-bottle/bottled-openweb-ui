@@ -6,10 +6,18 @@ provides a Playwright page logged in as the zone owner (so the router sends
 """
 
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 from openhost_test_harness import OpenhostStack
 from playwright.sync_api import Browser, Page, sync_playwright
+
+FAKE_BIFROST_DIR = Path(__file__).parent / "fake_bifrost"
+
+
+def _deploy_fake_bifrost(stack: OpenhostStack) -> None:
+    """Install a stand-in for the Bifrost gateway first, as an owner would install Bifrost before Open WebUI."""
+    stack.deploy_app(f"file://{FAKE_BIFROST_DIR}")
 
 
 @pytest.fixture(scope="session")
@@ -17,7 +25,7 @@ def stack() -> Iterator[OpenhostStack]:
     # The deploy window covers the image build (a ~4 GB base image to pull) and
     # Open WebUI's first boot, which runs DB migrations and downloads embedding
     # models from HuggingFace before it binds.
-    with OpenhostStack(deploy_timeout=600) as s:
+    with OpenhostStack(deploy_timeout=600, pre_deploy=_deploy_fake_bifrost) as s:
         yield s
 
 
