@@ -1,0 +1,22 @@
+# Test fixture: stands in for the Bifrost gateway by providing its OpenAI-compatible service.
+[app]
+name = "fake-bifrost"
+version = "0.1.0"
+description = "Test fixture standing in for the Bifrost gateway"
+hidden = true
+
+[runtime.container]
+image = "Dockerfile"
+port = 5000
+
+[routing]
+health_check = "/health"
+
+[resources]
+memory_mb = 64
+cpu_cores = 0.1
+
+[[services.v2.provides]]
+service = "github.com/imbue-openhost/openhost-bifrost-llm-gateway/services/openai-compat"
+version = "0.1.0"
+endpoint = "/service/"
