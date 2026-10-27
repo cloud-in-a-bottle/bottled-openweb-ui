@@ -1,4 +1,5 @@
-FROM ghcr.io/open-webui/open-webui:v0.9.5
+# Pinned by tag and multi-arch index digest; bump both to upgrade.
+FROM ghcr.io/open-webui/open-webui:v0.9.5@sha256:e045bde3b004cc7f8c319412345eb56c87ea6ac57031534a31ca37ad5424beb3
 
 # mitmproxy fronts the Bifrost gateway's service interface as a local OpenAI
 # endpoint (see openhost_bifrost_proxy.py). Use the standalone binary so it
