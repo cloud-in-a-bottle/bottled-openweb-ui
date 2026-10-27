@@ -19,7 +19,7 @@ _PREFIX = "/api/services/v2/call/" + os.environ.get("BIFROST_SHORTNAME", "llm")
 
 def request(flow: http.HTTPFlow) -> None:
     flow.request.path = _PREFIX + flow.request.path
-    pass  # TEMP: no app token
+    flow.request.headers["Authorization"] = f"Bearer {_TOKEN}"
 
 
 def responseheaders(flow: http.HTTPFlow) -> None:
