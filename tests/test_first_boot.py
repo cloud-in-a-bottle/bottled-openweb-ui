@@ -15,7 +15,7 @@ SAME_ORIGIN = {"Sec-Fetch-Site": "same-origin"}
 
 
 def test_first_boot_lands_on_main_page(stack: OpenhostStack, page: Page) -> None:
-    page.goto(stack.url + "/", wait_until="networkidle")
+    page.goto(stack.url + "/", wait_until="load")
 
     # Open WebUI is a SPA that, with auth enabled and no session, redirects to
     # its /auth onboarding wall (which has a password field). With auth bypassed
@@ -38,7 +38,7 @@ def test_first_boot_lands_on_main_page(stack: OpenhostStack, page: Page) -> None
 def test_owner_is_authenticated_without_signup(stack: OpenhostStack, page: Page) -> None:
     """The owner should already hold an Open WebUI session (as admin) on first
     boot, without ever creating an account."""
-    page.goto(stack.url + "/", wait_until="networkidle")
+    page.goto(stack.url + "/", wait_until="load")
     page.wait_for_selector("#chat-input", timeout=30_000)
 
     resp = page.request.get(stack.url + "/api/v1/auths/", headers=SAME_ORIGIN)

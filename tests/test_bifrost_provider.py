@@ -26,7 +26,7 @@ FAKE_BIFROST_MODEL = "fake-bifrost-model"  # served by tests/fake_bifrost/server
 def test_openai_connection_points_at_bifrost_proxy(stack: OpenhostStack, page: Page) -> None:
     # Land on the app first so the owner holds an admin session (the config
     # endpoint is admin-gated).
-    page.goto(stack.url + "/", wait_until="networkidle")
+    page.goto(stack.url + "/", wait_until="load")
     page.wait_for_selector("#chat-input", timeout=30_000)
 
     resp = page.request.get(stack.url + "/openai/config", headers=SAME_ORIGIN)
@@ -39,7 +39,7 @@ def test_openai_connection_points_at_bifrost_proxy(stack: OpenhostStack, page: P
 
 
 def test_bifrost_models_show_up_in_open_webui(stack: OpenhostStack, page: Page) -> None:
-    page.goto(stack.url + "/", wait_until="networkidle")
+    page.goto(stack.url + "/", wait_until="load")
     page.wait_for_selector("#chat-input", timeout=30_000)
 
     deadline = time.monotonic() + 60

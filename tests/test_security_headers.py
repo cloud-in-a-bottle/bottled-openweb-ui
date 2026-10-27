@@ -30,7 +30,7 @@ def test_security_headers_present(stack: OpenhostStack, page: Page) -> None:
 def test_cors_does_not_allow_arbitrary_origin(stack: OpenhostStack, page: Page) -> None:
     # Navigate first so Open WebUI has finished initializing and the auto-admin
     # (WEBUI_AUTH=False) exists before probing the admin-gated endpoint.
-    page.goto(stack.url + "/", wait_until="networkidle")
+    page.goto(stack.url + "/", wait_until="load")
     page.wait_for_selector("#chat-input", timeout=30_000)
 
     resp = page.request.get(
