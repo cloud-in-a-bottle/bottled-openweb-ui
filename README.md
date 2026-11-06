@@ -45,6 +45,13 @@ models), which is large and regenerates on demand.
 
 2 GB RAM, 1 CPU core.
 
+## Prebuilt image
+
+`cloudinabottle.toml` sets `prebuilt_image`, so Cloud in a Bottle pulls our
+signed prebuilt image (built by CI from each release tag) instead of building
+the Dockerfile. To fork and modify this app, comment out `prebuilt_image` so
+your instance builds from source.
+
 ## License
 
 Open WebUI is distributed under the Open WebUI License, a BSD-3-Clause-style
