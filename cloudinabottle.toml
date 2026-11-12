@@ -1,6 +1,6 @@
 [app]
 name = "openweb-ui"
-version = "1.0.0"
+version = "1.1.0"
 description = "Open WebUI on Cloud in a Bottle"
 
 [runtime.container]
